@@ -23,13 +23,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *******************************************************************************
 */
-#include <random>
+//#include <random>
+#include <cstdlib>
+#include <ctime>
 #include <string>
 #include <sstream>
 #include <windows.h>
 #include <shlobj.h>
 #include "gen.h"
 
+//#define APP_DEBUG
 #undef APP_DEBUG
 
 #ifdef APP_DEBUG
@@ -195,7 +198,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 			int gbH=20;
 			int gbX=(data.w/2)-(gbW/2);
 			int gbY=((data.h+(cY+cH))*0.38)+cY;
-			data.fadeDownSymbol=CreateWindow("BUTTON", "Generate", WS_CHILD | WS_VISIBLE | SS_CENTER, gbX, gbY, gbW, gbH, hwnd, (HMENU) 2, NULL, NULL);
+			data.GenBtn=CreateWindow("BUTTON", "Generate", WS_CHILD | WS_VISIBLE | SS_CENTER, gbX, gbY, gbW, gbH, hwnd, (HMENU) 2, NULL, NULL);
 			SendMessage(data.fadeDownSymbol, WM_SETFONT, (WPARAM)Arial16, TRUE);
 			break;
 		}
@@ -261,18 +264,105 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 						counter=path_str.find_first_of(" ");
 					}
 					std::stringstream file_txt_pre;
-					file_txt_pre << "<!DOCTYPE html><html style=\"background-color:black;width:100%;height:100%;\"><head><style>body{width:100%;height:85%;background:url(\"" << path_str << "\") center center no-repeat;opacity:0;margin-top:" << marginTop << "%;margin-left:" << marginLeft << "%;margin-bottom:" << marginBottom << "%;margin-right:" << marginRight << "%;overflow:hidden;}</style><script>var fIn=" << fadeUp << ";\n     var fOut=" << fadeDown << ";\n     var flash=100;\n     window.onload=function(){addEventListener(\"keydown\", function(e)\n     {\n       e=e||window.event;\n       var key=e.which||e.keyCode;\n       if(key===192)\n       {//tilde\n         var opacity=0;\n         var h=setInterval(function()\n                     {                       opacity+=0.01;\n                       document.body.style.opacity=opacity.toString();\n                       if(opacity>=1)\n                       {\n                         clearInterval(h);\n                       }\n                     }, fIn/100);\n       }\n       else if(key===220)\n       {//pipe\n         var opacity=1;\n         var h=setInterval(function()\n                     {\n                       opacity-=0.01;\n                       document.body.style.opacity=opacity.toString();\n                       if(opacity<=0)\n                       {\n                         clearInterval(h);\n                       }\n                     }, fOut/100);\n       }\n     });};</script></head><body></body></html>";
+					file_txt_pre << "	<!DOCTYPE html>\n \
+										<html style = \"background-color:black;width:100%;height:100%;\">\n \
+											<head>\n \
+												<style>\n \
+													body\n \
+													{\n \
+														width: 100%;\n \
+														height: 85%;\n \
+														background-image: url(\"" << path_str << "\");\n \
+														background-position: center center;\n \
+														background-repeat: no-repeat;\n \
+														background-size: cover;\n \
+														opacity: 0;\n \
+														margin-top: " << marginTop << "%;\n \
+														margin-left: " << marginLeft << "%;\n \
+														margin-bottom: " << marginBottom << "%;\n \
+														margin-right: " << marginRight << "%;\n \
+														overflow: hidden;\n \
+													}\n \
+												</style>\n \
+												<script>\n \
+													var fIn = " << fadeUp << ";\n \
+													var fOut = " << fadeDown << ";\n \
+													var flash = 100;\n \
+												    window.onload = function() \
+													{ \
+														addEventListener(\"keydown\", function(e)\n \
+														    						  {\n \
+																					    e = e || window.event;\n \
+																						var key = e.which || e.keyCode;\n \
+																						if (key === 192)\n \
+																						{//tilde\n \
+																						    var opacity = 0;\n \
+																						    if (fIn > 0)\n \
+																						    {\n \
+																								var h = setInterval(function()\n \
+																							                    	{ \
+																												    	opacity += 0.01;\n \
+																												    	document.body.style.opacity = opacity.toString();\n \
+																														if (opacity >= 1)\n \
+																														{\n \
+																														    clearInterval(h);\n \
+																														}\n \
+																													}, fIn / 100);\n \
+																							}\n \
+																							else\n \
+																							{\n \
+																								var h = setTimeout(function()\n \
+																													{\n \
+																														document.body.style.opacity = 1;\n \
+																													}, 0);\n \
+																							}\n \
+																				        }\n \
+																						else if (key === 220)\n \
+																						{//pipe\n \
+																						    var opacity = 1;\n \
+																						    if (fOut > 0)\n \
+																						    {\n \
+																								var h = setInterval(function()\n \
+																								{\n \
+																								    opacity -= 0.01;\n \
+																									document.body.style.opacity = opacity.toString();\n \
+																									if (opacity <= 0)\n \
+																									{\n \
+																									    clearInterval(h);\n \
+																									}\n \
+																								}, fOut/100);\n \
+																							}\n \
+																							else\n \
+																							{\n \
+																								var h = SetTimeout(function()\n \
+																													{\n \
+																														document.body.style.opacity = 1;\n \
+																													})\n \
+																							}\n \
+																				        }\n \
+																				      });\n \
+													}; \n \
+												</script>\n \
+											</head>\n \
+										<body>\n \
+									</body>\n \
+								</html>";
 					std::string file_txt=file_txt_pre.str();
 					char fpath[MAX_PATH+1];
 					SHGetFolderPath(NULL,CSIDL_DESKTOPDIRECTORY | CSIDL_FLAG_CREATE, NULL, SHGFP_TYPE_CURRENT,fpath);
-					std::default_random_engine generator;
-					std::uniform_int_distribution<int> distribution(0,10000000);
-					int num = distribution(generator);
+					//std::mt19937 generator;
+					//std::uniform_int_distribution<std::mt19937::result_type> distribution(0,10000000);
+					//int num = distribution(generator);
+					srand(time(NULL));
+					int num = rand();
 					std::stringstream path_name;
-					path_name << fpath << "\\projectorfade" << num << ".html";
+					path_name << /*fpath << "\\projectorfade"*/ "projectorfade" << num << ".html";
 					std::string path_name_str=path_name.str();
 					HANDLE file=CreateFile(path_name_str.c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
 					WriteFile(file, (LPVOID)file_txt.c_str(), file_txt.length(), NULL, NULL);
+					#ifdef APP_DEBUG
+					std::cout << path_name_str << "\t" << GetLastError() << "\n";
+					#endif
 					break;
 				}
 				default:
