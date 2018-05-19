@@ -313,7 +313,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 																							{\n \
 																								var h = setTimeout(function()\n \
 																													{\n \
-																														document.body.style.opacity = 1;\n \
+																														document.body.style.opacity = \"1\";\n \
 																													}, 0);\n \
 																							}\n \
 																				        }\n \
@@ -334,9 +334,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 																							}\n \
 																							else\n \
 																							{\n \
-																								var h = SetTimeout(function()\n \
+																								var h = setTimeout(function()\n \
 																													{\n \
-																														document.body.style.opacity = 1;\n \
+																														document.body.style.opacity = \"0\";\n \
 																													})\n \
 																							}\n \
 																				        }\n \
